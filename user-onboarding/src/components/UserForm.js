@@ -27,7 +27,7 @@ const UserForm = ({ errors, touched, values, status }) => {
           <p className='error'>{errors.name}</p>
         )}
         <Field 
-          type='text'
+          type='email'
           name='email'
           placeholder='Email'
         />
@@ -35,13 +35,21 @@ const UserForm = ({ errors, touched, values, status }) => {
           <p className='error'>{errors.email}</p>
         )}
         <Field 
-          type='text'
+          type='password'
           name='password'
           placeholder='Password'
         />
         {touched.password && errors.password && (
           <p className='error'>{errors.password}</p>
         )}
+        <Field component='select' className='role-select' name='role'>
+          <option>Please choose a role</option>
+          <option value='student'>Student</option>
+          <option value='teamLead'>Team Lead</option>
+          <option value='sectionLead'>Section Lead</option>
+          <option value='instructor'>Instructor</option>
+        </Field>
+
         <label className='checkbox-container'>
           Terms of service
           <Field 
@@ -51,11 +59,17 @@ const UserForm = ({ errors, touched, values, status }) => {
           />
           <span className='checkmark' />
         </label>
+        {touched.termsOfService && errors.termsOfService && (
+          <p className='error'>{errors.termsOfService}</p>
+        )}
         <button type='submit'>Submit</button>
       </Form>
 
       {users.map(user => (
-        <p key={user.id}>{user.name}</p>
+        <div key={user.id} className='user'>
+          <h3 >{user.name}</h3>
+          <div>{user.role}</div>
+        </div>
       ))}
     </div>
   );
@@ -63,11 +77,12 @@ const UserForm = ({ errors, touched, values, status }) => {
 
 
 const FormikUserForm = withFormik({
-  mapPropsToValues({ name, email, password, termsOfService }) {
+  mapPropsToValues({ name, email, password, role, termsOfService }) {
     return {
       name: name || '',
       email: email || '',
       password: password || '',
+      role: role || '',
       termsOfService: termsOfService || true
     };
   },
@@ -76,16 +91,17 @@ const FormikUserForm = withFormik({
     name: Yup.string().required('You must provide your name'),
     email: Yup.string().email().required(),
     password: Yup.string().required('You need a password to log back in'),
-    termsOfService: Yup.bool('true')
-      .test(
-        'consent',
-        'You have to agree with our Terms of Service.',
-        value => value === true
-      )  
-      // .oneOf([true], 'You must agree to terms of service.')
-      .required(
-        'You have to agree with our Terms of Service'
-      )
+    role: Yup.string(),
+    termsOfService: Yup.bool()
+      // .test(
+      //   'consent',
+      //   'You have to agree with our Terms of Service.',
+      //   value => value === true
+      // )  
+      .oneOf([true], 'You must agree to the terms of service.')
+      // .required(
+      //   'You have to agree with our Terms of Service'
+      // )
   }),
 
   handleSubmit(values, {setStatus}) {
